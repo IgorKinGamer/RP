@@ -1,0 +1,34 @@
+### Relatório ###
+
+O programa deve ser rodado assim (ibl = java -jar ibl.jar):
+	ibl {1|2} <arquivo-treino> [<arquivo-testes>]
+O número (1 ou 2) se refere à versão do algoritmo IBL.
+Ao rodar o programa, uma janela será mostrada referente ao arquivo de treino.
+Se o arquivo de treino possuir amostras com 2 dimensões, mais três janelas
+aparecerão:
+	- uma com as amostras,
+	- outra destacando as que entraram na DC e diferenciando as
+	  classificadas corretamente das incorretamente (usando IBL1, todas
+	  fazem parte do DC; usando IBL2, todas as que fazem parte do DC foram
+	  classificadas incorretamente, pela natureza do algoritmo)
+	- e outra mostrando o varrimento com força bruta ("pixelizado" para
+	  diminuir o processamento).
+Se um arquivo CSV de treino for fornecido, cada amostra deve ter pelo menos a
+quantidade de atributos do outro arquivo (coisas a mais, como classe no final,
+serão ignoradas) e uma janela aparecerá com os resultados descritos e, se os
+dados forem bidimensionais, mais uma mostrando a classificação de cada amostra.
+
+Formato do arquivo de treino:
+O arquivo de treino deve ser um arquivo CSV, com uma linha de cabeçalho (pode   
+ser vazia) e a classe na última coluna.
+
+A geração de espiral não foi implementada, porém os dados gerados no trabalho
+T1.2 ao se rodar, por exemplo (testes = java -jar testes.jar),
+	testes dupla 10 200 3.5 50 .5
+podem ser tratados com a seguinte substituição usando expressões regulares:
+	Encontrar:  ^(.*),(.*)\n^(.*),(.*)
+	Substituir: \1,\2,1\n\3,\4,2
+para se utilizar neste programa (o arquivo espiralDupla.csv foi gerado assim).
+
+Exemplo de uso:
+	ibl 2 generoIris2D.csv

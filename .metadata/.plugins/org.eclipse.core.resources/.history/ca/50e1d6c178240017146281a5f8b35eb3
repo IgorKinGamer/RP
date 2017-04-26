@@ -1,0 +1,35 @@
+package kg.rp.ibl;
+
+import java.util.*;
+
+public class DescritorConceitualIBL2 extends DescritorConceitual
+{
+	public DescritorConceitualIBL2(FunçãoSimilaridade fs)
+	{
+		super(fs);
+	}
+	
+	@Override
+	public void treinar(ConjuntoTreinamento ct)
+	{
+		Iterator<Classificação<String>> it = ct.iterator();
+		
+		// Coloca uma primeira amostra
+		adicionar(it.next());
+		// Processa as demais
+		while (it.hasNext())
+		{
+			Classificação<String> a, similar;
+			a = it.next();
+			similar = maisSimilar(a);
+			
+			if (a.classe().equals(similar.classe()))
+				correta(a);
+			else
+			{
+				incorreta(a);
+				adicionar(a);
+			}
+		}
+	}
+}

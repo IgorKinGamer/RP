@@ -1,0 +1,212 @@
+package kg.util.swing;
+
+import java.awt.*;
+import java.awt.geom.*;
+import java.awt.image.*;
+import java.util.*;
+import java.util.function.*;
+
+import javax.swing.*;
+
+import kg.rp.vor.*;
+import kg.util.geom.*;
+import kg.util.swing.*;
+
+@SuppressWarnings("serial")
+public class PainelBase extends JPanel
+{
+	public final Color COR_TRANSPARENTE = new Color(0, true);
+	
+	protected int borda, larguraTotal, alturaTotal, largura, altura;
+	
+	protected double x0, y0, escala;
+	
+	protected JFrame j;
+	protected JPanel painel;
+	
+	private void inicializar(int larg, int alt)
+	{
+		borda = 32;
+		larguraTotal = larg;
+		alturaTotal = alt;
+		largura = larg - 2*borda;
+		altura = alt - 2*borda;
+		
+		setPreferredSize(new Dimension(larg, alt));
+		
+		// Janela
+		j = new JFrame();
+		j.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		Janelas.registrarFechamentoJanela(j);
+		painel = new JPanel();
+	}
+	
+	public PainelBase(int larg, int alt)
+	{
+		inicializar(larg, alt);
+		
+		x0 = larguraTotal/2;
+		y0 = alturaTotal/2;
+		escala = 1;
+	}
+	
+	public <T> PainelBase(int larg, int alt, Collection<T> pontos, Function<T, Ponto> fPontos)
+	{
+		inicializar(larg, alt);
+		
+		calcularEscala(pontos, fPontos);
+	}
+	
+	protected void montarPainel()
+	{
+		BoxLayout layout = new BoxLayout(painel, BoxLayout.Y_AXIS);
+		painel.setLayout(layout);
+		painel.add(this);
+	}
+	
+	public void mostrar()
+	{
+		montarPainel();
+		
+		j.add(painel);
+		j.pack();
+		j.setVisible(true);/**/
+	}
+	
+	/**
+	 * Equivalente a {@link #criarCamada(int) criarCamada(BufferedImage.TYPE_INT_RGB)}.
+	 * @return Uma camada nova
+	 */
+	protected BufferedImage criarCamada()
+	{
+		return criarCamada(BufferedImage.TYPE_INT_RGB);
+	}
+	
+	/**
+	 * Equivalente a {@link #criarCamada(int) criarCamada(BufferedImage.TYPE_INT_ARGB)}.
+	 * @return Uma camada nova
+	 */
+	protected BufferedImage criarCamadaTransparente()
+	{
+		return criarCamada(BufferedImage.TYPE_INT_ARGB);
+	}
+	
+	/**
+	 * Cria uma camada, ou seja, uma imagem do tamanho deste painel.
+	 * Apenas cria, não registra nem desenha nem nada.
+	 * @param tipo {@link BufferedImage}.TYPE_...
+	 * @return Uma camada, ou seja, uma imagem do tamanho do painel
+	 */
+	protected BufferedImage criarCamada(int tipo)
+	{
+		return new BufferedImage(larguraTotal, alturaTotal, tipo);
+	}
+	
+	
+	protected void limpar(BufferedImage img, Color c)
+	{
+		Graphics2D grImg = img.createGraphics();
+		grImg.setColor(c);
+		grImg.fillRect(0, 0, larguraTotal, alturaTotal);
+	}
+	
+	protected <T> void desenharPontos(
+			BufferedImage img,
+			Collection<T> pontos, Function<T, Ponto> fPonto,
+			RectangularShape forma, double raio,
+			Function<T, Color> cores, boolean preencher)
+	{
+		Graphics2D gr = img.createGraphics();
+		gr.setRenderingHint(
+				RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		
+		for (T t : pontos)
+		{
+			Ponto p = transformar(fPonto.apply(t));
+			gr.setColor(cores.apply(t));
+			forma.setFrame(p.x - raio, p.y - raio, 2*raio, 2*raio);
+			if (preencher)
+				gr.fill(forma);
+			else
+				gr.draw(forma);
+		}
+	}
+	
+	protected void desenharArestas(
+			BufferedImage img, Collection<Aresta> arestas, double espessura, Color cor)
+	{
+		desenharArestas(img, arestas, a -> a, espessura, cor);
+	}
+	
+	protected <T> void desenharArestas(
+			BufferedImage img, Collection<T> arestas, Function<T, Aresta> fAresta, double espessura, Color cor)
+	{
+		Graphics2D gr = img.createGraphics();
+		gr.setRenderingHint(
+				RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		gr.setColor(cor);
+		gr.setStroke(new BasicStroke((float) espessura));
+		
+		Line2D.Double linha = new Line2D.Double();
+		
+		for (T t : arestas)
+		{
+			Aresta a = fAresta.apply(t);
+			Ponto p1, p2;
+			p1 = transformar(a.p1);
+			p2 = transformar(a.p2);
+			linha.setLine(p1.x, p1.y, p2.x, p2.y);
+			gr.draw(linha);
+		}
+	}
+	
+	protected <T> void calcularEscala(Collection<T> pontos, Function<T, Ponto> fPontos)
+	{
+		double xMín, xMáx, yMín, yMáx, escH, escV;
+		xMín = yMín = Double.POSITIVE_INFINITY;
+		xMáx = yMáx = Double.NEGATIVE_INFINITY;
+		for (T t : pontos)
+		{
+			Ponto p = fPontos.apply(t);
+			xMín = Math.min(xMín, p.x);
+			yMín = Math.min(yMín, p.y);
+			xMáx = Math.max(xMáx, p.x);
+			yMáx = Math.max(yMáx, p.y);
+		}
+		final double amplH, amplV;
+		amplH = xMáx - xMín;
+		amplV = yMáx - yMín;
+		escH = largura / amplH;
+		escV = altura / amplV;
+		escala = Math.min(escH, escV);
+		x0 = borda + (largura - amplH*escala)/2 - xMín*escala;
+		y0 = alturaTotal - (borda + (altura - amplV*escala)/2 - yMín*escala);
+	}
+	
+	/**
+	 * Transforma um ponto conforme a escala.
+	 * @param p Um ponto qualquer
+	 * @return O ponto resultante
+	 */
+	public Ponto transformar(Ponto p)
+	{
+		double x, y;
+		x = x0 + p.x*escala;
+		y = y0 - p.y*escala;
+		return new Ponto(x, y);
+	}
+	
+	/**
+	 * Faz o inverso de transformar, ou seja,
+	 * {@code transoformarTela(transformar(p)).equals(p)}
+	 * @param p
+	 * @return
+	 */
+	public Ponto transformarTelaParaMundo(Ponto p)
+	{
+		double x, y;
+		x = (p.x - x0)/escala;
+		y = -(p.y - y0)/escala;
+		return new Ponto(x, y);
+	}
+}

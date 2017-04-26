@@ -1,0 +1,8 @@
+package kg.rp.ibl;
+
+import kg.rp.vis.*;
+
+public class PainelPontos extends PainelBase
+{
+
+}

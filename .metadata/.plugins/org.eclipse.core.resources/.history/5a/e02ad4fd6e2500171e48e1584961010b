@@ -1,0 +1,51 @@
+package kg.util.geom;
+
+import kg.rp.vor.*;
+
+public class Ponto
+{
+	public final double x, y;
+	
+	public Ponto(double x, double y)
+	{
+		this.x = x;
+		this.y = y;
+	}
+	
+	public double distância(Ponto outro)
+	{
+		double dx = x - outro.x;
+		double dy = y - outro.y;
+		return Math.sqrt(dx*dx + dy*dy);
+	}
+	
+	public Ponto mais(Vetor v)
+	{
+		return new Ponto(x + v.h, y + v.v);
+	}
+
+	public static Ponto pontoMédio(Ponto p1, Ponto p2)
+	{
+		return new Ponto((p1.x + p2.x)/2, (p1.y + p2.y)/2);
+	}
+	
+	@Override
+	public boolean equals(Object o)
+	{
+		return (o instanceof Ponto)
+				&& x == ((Ponto) o).x
+				&& y == ((Ponto) o).y;
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		return Double.hashCode(x) + 101*Double.hashCode(y);
+	}
+	
+	@Override
+	public String toString()
+	{
+		return String.format("(%f, %f)", x, y);
+	}
+}

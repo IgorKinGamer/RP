@@ -1,0 +1,130 @@
+package kg.rp.ibl;
+
+import java.util.*;
+import java.util.function.*;
+
+import kg.util.*;
+
+public class IBL
+{
+	public static void main(String[] args)
+	{
+		new IBL(new Argumentos(args));
+	}
+	
+	
+	private DescritorConceitual dc;
+	private PainelPontos pp;
+	
+	public IBL(Argumentos args)
+	{
+		int nívelIBL = args.pint();
+		String arqTreino = null, arqTeste = null;
+		arqTreino = args.parg();
+		arqTeste = args.targ();
+		
+		Function<FunçãoSimilaridade, DescritorConceitual> f = null;
+		switch (nívelIBL)
+		{
+			case 1: f = DescritorConceitualIBL1::new;
+				break;
+			case 2: f = DescritorConceitualIBL2::new;
+				break;
+			default:
+				args.uso();
+		}
+		
+		dc = f.apply(new DistânciaEuclidiana());
+		
+		executar(arqTreino);
+		
+		// Se recebeu arquivo, classifica suas amostras e mostra os resultados
+		if (arqTeste != null)
+			testar(arqTeste);
+		
+		if (pp != null)
+			pp.mostrar();
+	}
+	
+	private void executar(String arqTreino)
+	{
+		// Lê amostras do arquivo
+		List<Classificação<String>> amostras = lerAmostrasClassificadas(arqTreino);
+		
+		// Cria o conjunto de treinamento com as amostras
+		ConjuntoTreinamento ct = new ConjuntoTreinamento(amostras);
+		
+		// Treina o descritor conceitual com o ct
+		dc.treinar(ct);
+		
+		// Mostra os resultados
+		StringBuilder resultados = new StringBuilder();
+		String[] texto =
+		{
+			"### RESULTADOS DO TREINAMENTO ###\n\n",
+			"Algoritmo: " + dc,
+			"Quantidade de amostras corretas:   " + dc.corretas().size()   + '\n',
+			"Quantidade de amostras incorretas: " + dc.incorretas().size() + '\n',
+		};
+		for (String s : texto)
+			resultados.append(s);
+		resultados.append("Amostras corretas:\n");
+		for (Classificação<String> a : dc.corretas())
+			resultados.append(a.toString()).append('\n');
+		resultados.append("Amostras incorretas:\n");
+		for (Classificação<String> a : dc.incorretas())
+			resultados.append(a.toString()).append('\n');
+		
+		// Mostra janela com texto
+		new JanelaTexto("Resultados", resultados.toString());
+		
+		// 2D
+		if (amostras.get(0).amostra().tamanho() == 2)
+		{
+			PainelPontos pp = new PainelPontos();
+			pp.adicionar(dc.corretas());
+		}
+	}
+	
+	private void testar(String arqTeste)
+	{
+		// Lê amostras do arquivo
+		List<Classificação<String>> amostras = lerAmostrasClassificadas(arqTeste);
+		
+		
+		// Classifica as amostras e mostra os resultados
+		
+		// 
+		
+	}
+	
+	private static List<Classificação<String>> lerAmostrasClassificadas(String arquivo)
+	{
+		String[][] linhas = new LeitorCSV().lerCSV(arquivo);
+		if (linhas == null)
+			erro("Não foi possível ler o arquivo " + arquivo);
+		if (linhas.length == 0)
+			erro("Arquivo vazio");
+		
+		LeitorAmostras la = new LeitorAmostras();
+		List<Classificação<String>> amostras = null;
+		try { amostras = la.lerAmostras(linhas, linhas[0].length); }
+		catch (IllegalArgumentException iae)
+		{
+			erro("Amostras inválidas: " + iae.getMessage());
+		}
+		
+		return amostras;
+	}
+	
+	public static void i(Object msg)
+	{
+		System.out.println(msg);
+	}
+	
+	public static void erro(String msg)
+	{
+		i(msg);
+		System.exit(0);
+	}
+}

@@ -1,0 +1,130 @@
+package kg.rp.ibl;
+
+import java.awt.*;
+import java.awt.geom.*;
+import java.awt.image.*;
+import java.util.*;
+import java.util.List;
+import java.util.function.*;
+
+import javax.swing.*;
+
+import kg.rp.ibl.util.*;
+import kg.rp.vis.*;
+
+@SuppressWarnings("serial")
+public class PainelPontos extends PainelBase
+{
+	private List<ParâmetrosDesenho> conjs;
+	private Collection<Classificação<String>> todosPontos;
+	private Map<String, Color> cores;
+	
+	private BufferedImage img;
+	
+	public PainelPontos(int larg, int alt, Map<String, Color> cores)
+	{
+		super(larg, alt);
+		
+		this.cores = cores;
+		
+		conjs = new LinkedList<>();
+		todosPontos = new HashSet<>();
+	}
+
+	public void adicionar(
+			Collection<Classificação<String>> pontos, RectangularShape forma,
+			//Function<Classificação<String>, Color> cores,
+			double raio, boolean preencher)
+	{
+		conjs.add(new ParâmetrosDesenho(pontos, forma, raio, preencher));
+		todosPontos.addAll(pontos);
+	}
+	
+	@Override
+	public void mostrar()
+	{
+		img = criarCamada();
+		limpar(img, Color.WHITE);
+		
+		// Escala
+		calcularEscala(todosPontos, Utilidades.classificaçãoParaPonto());
+		
+		// Desenha pontos
+		for (ParâmetrosDesenho par : conjs)
+			desenharPontos(img, par.pontos, Utilidades.classificaçãoParaPonto(),
+					par.forma, par.raio, a -> cores.get(a.classe()), par.preencher);
+		
+		super.mostrar();
+	}
+	
+	@Override
+	protected void montarPainel()
+	{
+		GroupLayout layout = new GroupLayout(painel);
+		painel.setLayout(layout);
+		
+		List<Component> legenda = new LinkedList<>();
+		for (String classe : cores.keySet())
+		{
+			JLabel l = new JLabel(classe);
+			l.setOpaque(true);
+			Color cor = cores.get(classe);
+			l.setBackground(cor);
+			l.setForeground( (299 * cor.getRed() + 587 * cor.getGreen() + 114 * cor.getBlue()) / 1000d > 128 ?
+					Color.BLACK : Color.WHITE);
+			legenda.add(l);
+		}
+		
+		GroupLayout.Group grupoHorizontalLegenda, grupoVerticalLegenda;
+		grupoHorizontalLegenda = layout.createParallelGroup();
+		grupoVerticalLegenda = layout.createSequentialGroup();
+		for (Component c : legenda)
+		{
+			grupoHorizontalLegenda.addComponent(c);
+			grupoVerticalLegenda.addComponent(c);
+		}
+		
+		// Horizontal
+		layout.setHorizontalGroup(
+				layout.createParallelGroup()
+						.addComponent(this)
+						.addGroup(grupoHorizontalLegenda)
+		);
+		layout.linkSize(SwingConstants.HORIZONTAL, legenda.toArray(new Component[0]));
+		layout.linkSize(SwingConstants.HORIZONTAL, this, legenda.get(0));
+		
+		// Vertical
+		layout.setVerticalGroup(
+				layout.createSequentialGroup()
+						.addComponent(this)
+						.addGroup(grupoVerticalLegenda)
+		);
+	}
+	
+	@Override
+	public void paint(Graphics gr)
+	{
+		gr.drawImage(img, 0, 0, null);
+	}
+	
+	private static class ParâmetrosDesenho
+	{
+		Collection<Classificação<String>> pontos;
+		RectangularShape forma;
+		//Function<Classificação<String>, Color> cores;
+		double raio;
+		boolean preencher;
+		
+		public ParâmetrosDesenho(
+				Collection<Classificação<String>> pontos, RectangularShape forma,
+				//Function<Classificação<String>, Color> cores,
+				double raio, boolean preencher)
+		{
+			this.pontos = pontos;
+			this.forma = forma;
+			//this.cores = cores;
+			this.raio = raio;
+			this.preencher = preencher;
+		}
+	}
+}

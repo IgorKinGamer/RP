@@ -1,0 +1,69 @@
+package kg.rp.ibl;
+
+import static kg.rp.ibl.JanelaTexto.KeyEventDispatcherLambdaProxy.*;
+
+import java.awt.*;
+import java.awt.event.*;
+
+import javax.swing.*;
+
+public class JanelaTexto
+{
+	public JanelaTexto(String título, String texto)
+	{
+		JTextArea área = new JTextArea(texto, 20, 80);
+		área.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+		área.setEditable(false);
+		
+		JScrollPane rolamento = new JScrollPane(área);
+		
+		JPanel painel = new JPanel();
+		painel.add(rolamento);
+		
+		JFrame janela = new JFrame(título);
+		janela.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		KeyboardFocusManager kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+		
+		KeyEventDispatcherLambdaProxy eu = proxy();
+		eu.definir(
+				e ->
+				{
+					System.out.println("Oi " + this);
+					if (janela.isFocused() && e.getID() == KeyEvent.KEY_PRESSED
+							&& e.getKeyCode() == KeyEvent.VK_ESCAPE)
+					{
+						janela.dispose();
+						kfm.removeKeyEventDispatcher(eu);
+						return true;
+					}
+					return false;
+				}
+		);
+		kfm.addKeyEventDispatcher(eu);
+		
+		janela.add(painel);
+		janela.pack();
+		janela.setVisible(true);
+	}
+	
+	public static class KeyEventDispatcherLambdaProxy implements KeyEventDispatcher
+	{
+		KeyEventDispatcher eu;
+		
+		@Override
+		public boolean dispatchKeyEvent(KeyEvent e)
+		{
+			return eu.dispatchKeyEvent(e);
+		}
+		
+		void definir(KeyEventDispatcher ked)
+		{
+			this.eu = ked;
+		}
+		
+		static KeyEventDispatcherLambdaProxy proxy()
+		{
+			return new KeyEventDispatcherLambdaProxy();
+		}
+	}
+}

@@ -1,0 +1,41 @@
+package kg.rp.ibl;
+
+import java.util.*;
+
+public class DistânciaEuclidiana implements FunçãoSimilaridade
+{
+	private int atrs;
+	private double[] min, max, mult;
+	
+	public DistânciaEuclidiana(int atrs)
+	{
+		this.atrs = atrs;
+		
+		min = new double[atrs];
+		max = new double[atrs];
+		Arrays.fill(min, Double.MAX_VALUE);
+		Arrays.fill(max, Double.MIN_VALUE);
+		mult = new double[atrs];
+	}
+	
+	@Override
+	public double aplicar(Amostra a, Amostra b)
+	{
+		final int numAtr = a.tamanho();
+		// Somatório dos quadrados das diferenças
+		double soma = 0;
+		for (int i = 0; i < numAtr; i++)
+		{
+			double dif = a.atributo(i) - b.atributo(i); 
+			soma += dif*dif;
+		}
+		// Oposto da raiz do somatório
+		return -Math.sqrt(soma);
+	}
+	
+	@Override
+	public void atualizarNormalização(Amostra a)
+	{
+		for (int i = 0;)
+	}
+}

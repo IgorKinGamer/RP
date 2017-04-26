@@ -1,0 +1,20 @@
+1490092559475	Copy compilation unit
+1490092594023	Rename field 'MSG_ERRO_CONJUNTO_VAZIO'
+1490100539661	Rename field 'dif'
+1490100549547	Rename local variable 'dif'
+1490187805155	Rename type 'LeitorCSV'
+1490187919402	Rename type 'CSV'
+1490207254742	Rename local variable 'fnfe'
+1490207260230	Rename local variable 'io'
+1490212861818	Rename local variable 'f'
+1490212875399	Rename local variable 'b'
+1490216496865	Rename field 'fundo'
+1490216503914	Rename field 'frente'
+1490216530227	Rename field 'grFrente'
+1490238772722	Rename local variable 'classes'
+1490300501103	Rename local variable 'finalPrimeira'
+1490300715046	Rename local variable 'amostras'
+1490305131463	Rename field 'últimoId'
+1490318365371	Copy file
+1490319197323	Move file
+1490319582172	Delete element

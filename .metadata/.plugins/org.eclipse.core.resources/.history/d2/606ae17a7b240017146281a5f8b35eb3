@@ -1,0 +1,12 @@
+package kg.rp.ibl;
+
+import kg.rp.vis.*;
+
+public class PainelPontos extends PainelBase
+{
+	public PainelPontos(int larg, int alt)
+	{
+		super(larg, alt);
+		// TODO Auto-generated constructor stub
+	}
+}

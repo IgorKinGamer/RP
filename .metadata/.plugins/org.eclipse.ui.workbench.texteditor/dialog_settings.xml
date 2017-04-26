@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
+		<item value="true" key="isRegEx"/>
+		<item value="13.45981062819516,0.0,1&#x0A;-7.026668657601688,36.83508706680245,2" key="selection"/>
+		<item value="true" key="casesensitive"/>
+		<item value="false" key="incremental"/>
+		<item value="true" key="wrap"/>
+		<item value="true" key="wholeword"/>
+		<list key="findhistory">
+			<item value="acc"/>
+			<item value="^(.*),(.*)\n^(.*),(.*)"/>
+			<item value="^(.*),(.*),\1\2"/>
+			<item value="^(.*),(.*)"/>
+			<item value="alt"/>
+			<item value="larg"/>
+			<item value="&#x09;&#x09;&#x09;painelDC = new PainelPontos(&quot;Descrição conceitual&quot;, larg, alt, coresClasses);"/>
+			<item value="pp"/>
+		</list>
+		<list key="replacehistory">
+			<item value="\1,\2,1\n\3,\4,2"/>
+			<item value="\1,\2"/>
+			<item value="\1,\2,\1\2"/>
+			<item value="painelDC"/>
+			<item value="HashSet"/>
+			<item value="Classificação&lt;String&gt;"/>
+			<item value="painelBase.repaint()"/>
+			<item value="painel.repaint()"/>
+		</list>
+	</section>
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
+		<item value="258" key="DIALOG_WIDTH"/>
+		<item value="1|Segoe UI|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|Segoe UI" key="DIALOG_FONT_NAME"/>
+		<item value="381" key="DIALOG_HEIGHT"/>
+		<item value="1033" key="DIALOG_X_ORIGIN"/>
+		<item value="192" key="DIALOG_Y_ORIGIN"/>
+	</section>
+</section>

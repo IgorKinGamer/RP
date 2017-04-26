@@ -1,0 +1,92 @@
+package kg.rp.vor;
+
+import kg.util.geom.*;
+
+public class Vetor
+{
+	final double h, v;
+	
+	public Vetor(double h, double v)
+	{
+		this.h = h;
+		this.v = v;
+	}
+	
+	public Vetor(Ponto p1, Ponto p2)
+	{
+		this(p2.x - p1.x, p2.y - p1.y);
+	}
+	
+	public Vetor(Ponto p)
+	{
+		this(p.x, p.y);
+	}
+
+	public Vetor(Vetor v1, Vetor v2)
+	{
+		this(v2.h - v1.h, v2.v - v1.v);
+	}
+	
+	
+	/////// OPERAÇÕES ///////
+	
+	public Vetor vezes(double f)
+	{
+		return new Vetor(f*h, f*v);
+	}
+	
+	public Vetor comTamanho(double tam)
+	{
+		return this.vezes(tam/this.tamanho());
+	}
+	
+	public double produtoInterno(Vetor o)
+	{
+		return h*o.h + v*o.v;
+	}
+
+	public double normaAoQuadrado()
+	{
+		return h*h + v*v;
+	}
+	
+	public double tamanho()
+	{
+		return Math.sqrt(normaAoQuadrado());
+	}
+	
+	/**
+	 * Retorna um vetor perpendicular à este, igual a este rotacionado
+	 * 90º no sentido anti-horário.
+	 * @return Vetor perpendicular a este
+	 */
+	public Vetor perpendicular()
+	{
+		return new Vetor(-v, h);
+	}
+	
+	public boolean vetorÀEsquerda(Vetor o)
+	{
+		/*
+		 * Se o determinante de
+		 *   h   v
+		 *  o.h o.v
+		 * é positivo.
+		 */
+		return h*o.v - v*o.h > 0;
+	}
+	
+	@Override
+	public boolean equals(Object o)
+	{
+		return (o instanceof Vetor)
+				&& h == ((Vetor) o).h
+				&& v == ((Vetor) o).v;
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		return Double.hashCode(h) + 107*Double.hashCode(v);
+	}
+}

@@ -1,0 +1,17 @@
+package kg.rp.ibl;
+
+import javax.swing.*;
+
+public class JanelaTexto
+{
+	public JanelaTexto(String título, String texto)
+	{
+		JTextArea área = new JTextArea(texto);
+		
+		JPanel painel = new JPanel();
+		painel.add(área);
+		
+		JFrame janela = new JFrame(título);
+		
+	}
+}

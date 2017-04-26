@@ -1,0 +1,224 @@
+package kg.rp.ibl;
+
+import java.awt.*;
+import java.awt.geom.*;
+import java.io.*;
+import java.util.*;
+import java.util.List;
+import java.util.function.*;
+
+import kg.rp.vor.*;
+import kg.util.*;
+
+public class IBL
+{
+	public static void main(String[] args)
+	{
+		new IBL(new Argumentos(args));
+	}
+	
+	
+	private DescritorConceitual dc;
+	
+	private Map<String, Color> coresClasses;
+	
+	// TODO Refatorar
+	private int tamanhoDasAmostras;
+	
+	public IBL(Argumentos args)
+	{
+		// Pega argumentos
+		int nívelIBL = args.pint();
+		String arqTreino = null, arqTeste = null;
+		arqTreino = args.parg();
+		arqTeste = args.targ();
+		
+		Function<FunçãoSimilaridade, DescritorConceitual> f = null;
+		switch (nívelIBL)
+		{
+			case 1: f = DescritorConceitualIBL1::new;
+				break;
+			case 2: f = DescritorConceitualIBL2::new;
+				break;
+			default:
+				args.uso();
+		}
+		
+		dc = f.apply(new DistânciaEuclidiana());
+		
+		executar(arqTreino);
+		
+		// Se recebeu arquivo, classifica suas amostras e mostra os resultados
+		if (arqTeste != null)
+			testar(arqTeste);
+	}
+	
+	private void executar(String arqTreino)
+	{
+		// Lê amostras do arquivo
+		List<Classificação<String>> amostras = lerAmostrasClassificadas(arqTreino);
+		
+		// Cria o conjunto de treinamento com as amostras
+		ConjuntoTreinamento ct = new ConjuntoTreinamento(amostras);
+		
+		// Treina o descritor conceitual com o ct
+		dc.treinar(ct);
+		
+		// Mostra os resultados
+		StringBuilder resultados = new StringBuilder();
+		String[] texto =
+		{
+			"### RESULTADOS DO TREINAMENTO ###\n\n",
+			"Algoritmo: " + dc + '\n',
+			"Quantidade de amostras corretas:   " + dc.corretas().size()   + '\n',
+			"Quantidade de amostras incorretas: " + dc.incorretas().size() + '\n',
+		};
+		for (String s : texto)
+			resultados.append(s);
+		
+		resultados.append('\n');
+		resultados.append("Amostras corretas:\n");
+		for (Classificação<String> a : dc.corretas())
+			resultados.append(a.toString()).append('\n');
+		
+		resultados.append('\n');
+		resultados.append("Amostras incorretas:\n");
+		for (Classificação<String> a : dc.incorretas())
+			resultados.append(a.toString()).append('\n');
+		
+		// Mostra janela com texto
+		new JanelaTexto("Resultados do treino", resultados.toString());
+		
+		// 2D
+		tamanhoDasAmostras = amostras.get(0).amostra().tamanho();
+		if (amostras.get(0).amostra().tamanho() == 2)
+		{
+			coresClasses = new HashMap<>();
+			Set<String> classes = new HashSet<>();
+			for (Classificação<String> a : amostras)
+				classes.add(a.classe());
+			int numClasses = classes.size(), i = 0;
+			for (String classe : classes)
+				coresClasses.put(classe, Color.getHSBColor((float)i++/numClasses, 1, 1));
+			
+			int larg, alt;
+			larg = alt = 480;
+			
+			// Painel com pontos originais
+			PainelPontos painelTreino;
+			painelTreino = new PainelPontos("Pontos de treinamento", larg, alt, coresClasses);
+			painelTreino.adicionar(amostras, new Ellipse2D.Double(), 3, true);
+			painelTreino.mostrar();
+			
+			// Painel com a DC (resultado do treinamento) (c: correto, i: incorreto; d: dentro, f: fora)
+			Set<Classificação<String>> dentro, fora, cDentro, iDentro, cFora, iFora;
+			// Conjuntos ((dentro | fora) [correto | incorreto])
+			dentro = new HashSet<>(dc.amostras());
+			fora = new HashSet<>(amostras); fora.removeAll(dentro);
+			cDentro = new HashSet<>(dentro); cDentro.retainAll(dc.corretas());
+			iDentro = new HashSet<>(dentro); iDentro.retainAll(dc.incorretas());
+			cFora = new HashSet<>(fora); cFora.retainAll(dc.corretas());
+			iFora = new HashSet<>(fora); iFora.retainAll(dc.incorretas());
+			// Cria
+			PainelPontos painelDC;
+			painelDC = new PainelPontos("Descrição conceitual", larg, alt, coresClasses);
+			painelDC.adicionar(cFora, new Ellipse2D.Double(), 2, false);
+			painelDC.adicionar(iFora, new Rectangle2D.Double(), 2, false);
+			painelDC.adicionar(cDentro, new Ellipse2D.Double(), 4, true);
+			painelDC.adicionar(iDentro, new Rectangle2D.Double(), 4, true);
+			painelDC.adicionarDescrição("Preenchidos: Fazem parte da DC  –  Não preenchidos: Não fazem parte da DC");
+			painelDC.adicionarDescrição("Círculos: Corretos  –  Quadrados: Incorretos");
+			painelDC.mostrar();
+			
+			// Painel força bruta
+			PainelPontos painelVarrimento;
+			painelVarrimento = new PainelPontos("Varrimento pixelizado com força bruta", larg, alt, coresClasses);
+			final int passo = 5;
+			final double meioPasso = passo/2d;
+			Color cor = null;
+			for (int y0 = 0; y0 < alt; y0 += passo)
+				for (int x0 = 0; x0 < larg; x0 += passo)
+				{
+					Ponto p = painelTreino.transformarTelaParaMundo(new Ponto(x0+meioPasso, y0+meioPasso));
+					String classe = dc.maisSimilar(new Amostra(new double[] {p.x, p.y})).classe();
+					cor = coresClasses.get(classe);
+					int xf, yf; // Finais
+					xf = Math.min(x0+passo, larg);
+					yf = Math.min(y0+passo, alt);
+					for (int y = y0; y < yf; y++)
+						for (int x = x0; x < xf; x++)
+							painelVarrimento.pintar(x, y, cor);
+				}
+			painelVarrimento.mostrar();
+		}
+	}
+	
+	private void testar(String arqTeste)
+	{
+		// Lê amostras do arquivo
+		List<Amostra> amostras = lerAmostrasDeTamanho(arqTeste, tamanhoDasAmostras);
+		
+		// Classifica as amostras e mostra os resultados
+		List<Classificação<String>> classificações = new LinkedList<>();
+		for (Amostra a : amostras)
+			classificações.add(new Classificação<String>(a, dc.maisSimilar(a).classe()));
+		
+		// Mostra
+		
+		
+		// Painel com os pontos classificados
+		PainelPontos painelTreino;
+		painelTreino = new PainelPontos("Pontos de treinamento", larg, alt, coresClasses);
+		painelTreino.adicionar(amostras, new Ellipse2D.Double(), 3, true);
+		painelTreino.mostrar();
+	}
+	
+	private static List<Classificação<String>> lerAmostrasClassificadas(String arquivo)
+	{
+		String[][] linhas = new LeitorCSV().lerCSV(arquivo);
+		if (linhas == null)
+			erro("Não foi possível ler o arquivo " + arquivo);
+		if (linhas.length == 0)
+			erro("Arquivo " + arquivo + "vazio");
+		
+		LeitorAmostras la = new LeitorAmostras();
+		List<Classificação<String>> amostras = null;
+		try { amostras = la.lerAmostrasClassificadas(linhas, linhas[0].length); }
+		catch (IllegalArgumentException iae)
+		{
+			erro("Amostras inválidas: " + iae.getMessage());
+		}
+		
+		return amostras;
+	}
+	
+	private static List<Amostra> lerAmostrasDeTamanho(String arquivo, int tam)
+	{
+		String[][] linhas = new LeitorCSV().lerCSV(arquivo);
+		if (linhas == null)
+			erro("Não foi possível ler o arquivo " + arquivo);
+		if (linhas.length == 0)
+			erro("Arquivo " + arquivo + "vazio");
+		
+		LeitorAmostras la = new LeitorAmostras();
+		List<Amostra> amostras = null;
+		try { amostras = la.lerAmostrasDeTamanho(linhas, tam); }
+		catch (IllegalArgumentException iae)
+		{
+			erro("Amostras inválidas: " + iae.getMessage());
+		}
+		
+		return amostras;
+	}
+	
+	public static void i(Object msg)
+	{
+		System.out.println(msg);
+	}
+	
+	public static void erro(String msg)
+	{
+		i(msg);
+		System.exit(0);
+	}
+}

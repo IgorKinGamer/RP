@@ -1,0 +1,79 @@
+package kg.rp.clas;
+
+/**
+ * Representa a classificação de uma amostra.
+ * <p>
+ * O tipo das classes pode ser uma enumeração em casos em que todas as opções
+ * já são previamente conhecidas.
+ *
+ * @param <C>
+ */
+public class Classificação<C>
+{
+	/** Id que será atribuído à próxima classificação criada. */
+	private static long próximoId = 0;
+	
+	/** Id da classificação, único na aplicação. */
+	private final long id;
+	
+	/** A amostra classificada. */
+	private Amostra amostra;
+	/** A classe atribuída à amostra. */
+	private C classe;
+	
+	/**
+	 * Cria uma classificação que representa que a amostra {@code a} é da classe
+	 * {@code c}.
+	 * @param a A amostra
+	 * @param c A classe atribuída a amostra
+	 */
+	public Classificação(Amostra a, C c)
+	{
+		id = próximoId++;
+		
+		amostra = a;
+		classe = c;
+	}
+	
+	/**
+	 * A amostra classificada.
+	 * @return A amostra classificada
+	 */
+	public Amostra amostra()
+	{
+		return amostra;
+	}
+	
+	/**
+	 * A classe atribuída à amostra.
+	 * @return A classe atribuída à amostra
+	 */
+	public C classe()
+	{
+		return classe;
+	}
+	
+	/**
+	 * Retorna o id da classificação, único na aplicação.
+	 * Usado para ordenar classificações idênticas.
+	 * @return O id da classificação
+	 */
+	public long id()
+	{
+		return id;
+	}
+
+	@Override
+	public boolean equals(Object o)
+	{
+		return o instanceof Classificação
+				&& amostra.equals(((Classificação<?>) o).amostra)
+				&& classe.equals(((Classificação<?>) o).classe);
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		return amostra.hashCode() + 37*classe.hashCode();
+	}
+}

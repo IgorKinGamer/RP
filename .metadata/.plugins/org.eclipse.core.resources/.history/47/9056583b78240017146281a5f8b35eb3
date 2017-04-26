@@ -1,0 +1,38 @@
+package kg.rp.ibl;
+
+import java.awt.*;
+import java.awt.event.*;
+
+import javax.swing.*;
+
+public class JanelaTexto
+{
+	public static void main(String[] args)
+	{
+		new JanelaTexto("Teste", "Esta é umaj lsnela ejsrj\n\n\n\n\n\n\n\n\nedaf\n\n\n\n\n\n\n\n\nsd\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\ndsd\n\n\n\n\n\n\n\n\nsd");
+	}
+	
+	public JanelaTexto(String título, String texto)
+	{
+		JTextArea área = new JTextArea(texto, 20, 48);
+		área.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+		JScrollPane rolamento = new JScrollPane(área);
+		
+		JPanel painel = new JPanel();
+		painel.add(rolamento);
+		//área.setPreferredSize(new Dimension(640, 480));
+		
+		JFrame janela = new JFrame(título);
+		janela.addKeyListener(new KeyAdapter()
+		{
+			public void keyPressed(KeyEvent e)
+			{
+				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
+					janela.dispose();
+			}
+		});
+		janela.add(painel);
+		janela.pack();
+		janela.setVisible(true);
+	}
+}

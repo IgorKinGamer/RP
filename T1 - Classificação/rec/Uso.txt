@@ -1,0 +1,80 @@
+Uso (testes = java -jar testes.jar):
+
+testes [-a] [-v<vizinhos>] [-m<métrica>] <função>
+
+	-a - Usa um gerador de valores aleatórios fixo, ou seja, duas execuções
+	  com argumentos idênticos terão resultados idênticos
+	-a, -v e -m valem para as funções: simples, dupla, dados.
+	<vizinhos> (inteiro > 0) é a quantidade de vizinhos usada no kNN.
+	  O padrão é 1.
+	<métrica> pode ser:
+		e - Distância euclidiana (padrão)
+		h - Hamming extendido
+	
+<função> pode ser uma das seguintes: simples, dupla, dados (ou dataset), voronoi
+
+	{simples | dupla}  <raioInicial> <raioFinal> <voltas> <ppv> <ruído>
+	
+		Monta uma espiral simples ou dupla (ie. duas espirais) e
+		  mostra numa janela.
+		Os pontos da espiral gerada são escritos no arquivo
+		  "espiral.csv", o qual pode ser usado com a função voronoi.
+		De <raioInicial> a <ruído>, todos são valores em ponto
+		  flutuante.
+		<ppv> é a quantidade de pontos por volta.
+		Um <ruído> 1.0 significa que um ponto em uma volta da espiral
+		  pode ser deslocado até a próxima volta dela ou até a volta
+		  anterior dela;
+		  0.0 significa que não há ruído;
+		  para outros valores, o deslocamento máximo é proporcional.
+		Podem ser passados apenas os n primeiros argumentos a partir
+		  de <raioInicial> ou nenhum deles (n >= 0) e os restantes
+		  usarão valores padrões (30 200 3 50 0)
+	
+	{dados | dataset}  <arquivo csv> [c] [f]
+	
+		Usa as amostras no arquivo CSV, parte (escolhida
+		  aleatóriamente) como conjunto de treinamento e o resto
+		  como conjunto de testes, mostra os resultados e escreve
+		  os resultados detalhados no arquivo "Resultados.txt".
+		Se os dados forem bidimensionais, mostra os resultados
+		  graficamente.
+		<arquivo csv> - Arquivo contendo valores (reais) das amostras
+		  com a classe de cada amostra, sempre na primeira ou sempre
+		  na útima coluna.
+		c - Indica que há uma linha de cabeçalho, que será ignorada
+		f - Indica que a última coluna (em vez da primeira) contém
+		  as classes
+	
+	voronoi  <arquivo csv>
+	
+		Monta o diagrama de Voronoi a partir dos pontos no arquivo CSV,
+		  que deve conter dois valores (x e y) por linha.
+		Mostra os resultados (triangulação de Delaunay, o diagrama e os
+		  pontos) numa janela, com instruções para alterar a
+		  visualização (zoom, mostrar/esconder triangulação etc.).
+
+Exemplos:
+
+	testes simples
+		Espiral simples com os valores padrões
+
+	testes dupla 0 100 3 100 .2
+		Espiral dupla com os valores dados para raioInicial, raioFinal,
+		voltas, ppv e ruído
+
+	testes dados generoIris.csv c f
+		Testa os dados (que devem ter uma linha de cabeçalho e a classe
+		de cada amostra na última coluna) com NN e distância euclidiana
+
+	testes -a -v3 -mh dados generoIris.csv c f
+		Testa os dados com geração de números aleatórios fixa,
+		kNN com k = 3 e Hamming extendido
+
+	testes dados generoIris2D.csv c f
+		Testa os dados e mostra os resultados graficamente (se
+		generoIris2D.csv tiver 2 dimensões)
+
+	testes voronoi 200pontos.csv
+		Apresenta a triangulação de Delaunay, o diagrama de Voronoi e
+		os pontos que estão no arquivo passado

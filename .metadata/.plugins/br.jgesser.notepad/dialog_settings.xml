@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<item value="0" key="tab.selected"/>
+	<item value="Note #1" key="text.name.note#0"/>
+	<item value="C:\Users\Vanilda\Desktop\Mesa\I\Gicorado.jpg&#x0D;&#x0A;&#x0D;&#x0A;Interface para pegar os pontos (vendo a imagem por baixo)&#x0D;&#x0A;&#x0D;&#x0A;Tabela de amostras (r, g, b) a partir dos pontos&#x0D;&#x0A;Calcular A a partir das amostras&#x0D;&#x0A;Calcular A^-1&#x0D;&#x0A;Fórmula: (x - y) * A^-1 * (x - y)^T&#x0D;&#x0A;&#x0D;&#x0A;Aplicar a fórmula a cada ponto da imagem&#x0D;&#x0A;Normalizar o resultado&#x0D;&#x0A;Colocar numa nova imagem&#x0D;&#x0A;&#x0D;&#x0A;Colocar em outra imagem o mesmo usando distância euclidiana&#x0D;&#x0A;&#x0D;&#x0A;Mostrar as imagens&#x0D;&#x0A;&#x0D;&#x0A;&#x0D;&#x0A;Pega a imagem&#x0D;&#x0A;Gera tabela de pixels&#x0D;&#x0A;Passa a tabela por uma operação que gera outra tabela (com a mesma quatidade de linhas)&#x0D;&#x0A;&#x0D;&#x0A;&#x0D;&#x0A;BOKA PA KE TI KERU" key="text.contents.note#0"/>
+	<item value="true" key="text.wrap.note#0"/>
+	<item value="1" key="tab.count"/>
+</section>

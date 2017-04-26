@@ -1,0 +1,204 @@
+package kg.rp.ibl;
+
+import java.util.*;
+
+public class DescritorConceitualIBL3 extends DescritorConceitual
+{
+	private Map<Classificação<String>, RegistroInstância> regsInsts;
+	private Map<String, RegistroClasse> regsClasses;
+	
+	private double zA, zR;
+	int instsProcessadas;
+	
+	public DescritorConceitualIBL3(int atrs)
+	{
+		super(new DistânciaEuclidiana(atrs));
+		
+		zA = .9;
+		zR = .75;
+		instsProcessadas = 0;
+	}
+	
+	@Override
+	public void treinar(ConjuntoTreinamento ct)
+	{
+		Iterator<Classificação<String>> it = ct.iterator();
+		Random r = new Random();
+		
+		// Coloca uma primeira amostra
+		Classificação<String> inicial = it.next();
+		fSim.atualizarNormalização(inicial.amostra());
+		adicionar(inicial);
+		atualizarClasses(inicial.classe());
+		
+		// Processa as demais
+		while (it.hasNext())
+		{
+			Classificação<String> atual;
+			atual = it.next();
+			fSim.atualizarNormalização(atual.amostra());
+			
+			// Lista ordenada
+			List<Medição> medições = new ArrayList<>(amostras().size());
+			for (Classificação<String> outra : amostras())
+				medições.add(new Medição(outra, fSim.aplicar(atual.amostra(), outra.amostra())));
+			medições.sort(null);
+			
+			// Encontra primeira aceitável
+			int indSimilar = r.nextInt(medições.size());
+			Classificação<String> similar = medições.get(indSimilar).amostra;
+			for (int i = 0; i < medições.size(); i++)
+			{
+				Medição m = medições.get(i);
+				if (aceitável(m.amostra.amostra()))
+				{
+					indSimilar = i;
+					similar = m.amostra;
+				}
+			}
+			
+			// Verifica classificação
+			if (atual.classe().equals(similar.classe()))
+				correta(atual);
+			else
+			{
+				incorreta(atual);
+				adicionar(atual);
+			}
+			
+			// Atualiza todo mundo até o aceitável
+			for (int i = 0; i < indSimilar; i++)
+			{
+				Medição m = medições.get(i);
+				atualizar(m.amostra, atual.classe());
+			}
+			atualizarClasses(atual.classe());
+		}
+	}
+	
+	private boolean aceitável(Amostra a)
+	{
+		return false;
+	}
+	
+	private void atualizar(Classificação<String> amostra, String classeReal)
+	{
+		RegistroInstância regInst = regsInsts.get(amostra);
+		RegistroClasse regClasse = regsClasses.get(amostra.classe());
+		
+		// Atualiza blablabla
+		if (amostra.classe().equals(classeReal))
+			;
+		else
+			;
+		
+		// Se for ruim, joga fora
+		if (regInst.precR[1] < regClasse.freqR[0])
+			remover(amostra);
+	}
+	
+	private void atualizarClasses(String classeNova)
+	{
+		// Mais uma processada
+		instsProcessadas++;
+		// Mais uma desta classe
+		regsClasses.get(classeNova).vezes++;
+		// Atualiza intervalos de cada classe
+		for (RegistroClasse classe : regsClasses.values())
+			classe.atualizar();
+	}
+	
+	private void criarRegistro(Classificação<String> amostra)
+	{
+		if (!regsInsts.containsKey(amostra))
+			regsInsts.put(amostra, new RegistroInstância());
+		if (!regsClasses.containsKey(amostra.classe()))
+			regsClasses.put(amostra.classe(), new RegistroClasse(amostra.classe()));
+	}
+	
+	@Override
+	protected void adicionar(Classificação<String> nova)
+	{
+		super.adicionar(nova);
+		criarRegistro(nova);
+	}
+	
+	@Override
+	public String classificar(Amostra a)
+	{
+		return maisSimilar(a).classe();
+	}
+	
+	@Override
+	public String toString()
+	{
+		return "IBL3";
+	}
+	
+	private class Medição implements Comparable<Medição>
+	{
+		Classificação<String> amostra;
+		double similaridade;
+		
+		public Medição(Classificação<String> a, double s)
+		{
+			amostra = a;
+			similaridade = s;
+		}
+		
+		@Override
+		public int compareTo(Medição o)
+		{
+			return (int) Math.signum(similaridade - o.similaridade);
+		}
+	}
+	
+	private class RegistroInstância
+	{
+		private Classificação<String> amostra;
+		
+		// Valores
+		private int acertos, erros;
+		
+		// Intervalos (de precisão) de aceitação e rejeição
+		double[] precA, precR;
+		
+		void acerto() { acertos++; }
+	}
+	
+	private class RegistroClasse
+	{
+		String classe;
+		
+		int vezes;
+		double p;
+		
+		// Intervalos (de frequência) de aceitação e rejeição
+		double[] freqA, freqR;
+		
+		public RegistroClasse(String cl)
+		{
+			classe = cl;
+			freqA = new double[2];
+			freqR = new double[2];
+		}
+		
+		void atualizar()
+		{
+			p = (double) vezes / instsProcessadas;
+			fórmula(p, vezes, zA, freqA);
+			fórmula(p, vezes, zR, freqR);
+		}
+	}
+	
+	private void fórmula(double p, double n, double z, double[] saída)
+	{
+		double num, den, raiz;
+		raiz = z * Math.sqrt(p*(1-p)/n + z*z/(4*n*n));
+		num = p + z*z/(2*n);
+		den = 1 + z*z/n;
+		
+		saída[0] = (num - raiz)/den;
+		saída[1] = (num + raiz)/den;
+	}
+}

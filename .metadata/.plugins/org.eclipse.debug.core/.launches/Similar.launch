@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/T1.3 – Métricas de similaridade/src/kg/rp/mahal/Similar.java"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="1"/>
+</listAttribute>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="kg.rp.mahal.Similar"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="${file_prompt:Escolha uma imagem}"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="T1.3 – Métricas de similaridade"/>
+</launchConfiguration>

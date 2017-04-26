@@ -1,0 +1,51 @@
+package kg.util.geom;
+
+public class Aresta
+{
+	public final Ponto p1, p2;
+	public final Vetor v;
+	
+	public Aresta(double x1, double y1, double x2, double y2)
+	{
+		this(new Ponto(x1, y1), new Ponto(x2, y2));
+	}
+	
+	public Aresta(Ponto p1, Ponto p2)
+	{
+		this.p1 = p1;
+		this.p2 = p2;
+		v = new Vetor(p1, p2);
+	}
+	
+	public Ponto pontoMÈdio()
+	{
+		return Ponto.pontoMÈdio(p1, p2);
+	}
+	
+	public boolean ponto¿Esquerda(Ponto p)
+	{
+		return v.vetor¿Esquerda(new Vetor(p1, p));
+	}
+	
+	@Override
+	public boolean equals(Object o)
+	{
+		if (!(o instanceof Aresta))
+			return false;
+		Aresta outra = (Aresta) o;
+		return p1.equals(outra.p1) && p2.equals(outra.p2)
+				|| p1.equals(outra.p2) && p2.equals(outra.p1);
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		return p1.hashCode() + p2.hashCode();
+	}
+	
+	@Override
+	public String toString()
+	{
+		return String.format("(%s -- %s)", p1.toString(), p2.toString());
+	}
+}
